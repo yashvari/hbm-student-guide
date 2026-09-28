@@ -1,0 +1,22 @@
+{
+  "rows": 1100,
+  "columns": 647,
+  "all_values_finite": true,
+  "final_time_ms": 10.99029,
+  "raw_dt_min_ms": 0.009718999999998701,
+  "raw_dt_max_ms": 0.010089999999999932,
+  "uniform_dt_ms": 0.010000263876251136,
+  "mass_initial_kg": 21.08616,
+  "mass_final_kg": 21.08616,
+  "initial_kinetic_energy_J": 21.52119,
+  "final_internal_energy_J": 18.86751,
+  "final_kinetic_energy_J": 2.916282,
+  "final_hourglass_energy_J": 0.03090794,
+  "peak_hourglass_over_initial_KE_percent": 0.1486777450503434,
+  "final_Z_velocity_m_s": 1.07901,
+  "peak_raw_acceleration_g": 179.52420348377495,
+  "peak_raw_contact_normal_resultant_kN": 3.134757135375035,
+  "peak_CFC1000_acceleration_g": 96.5183055615537,
+  "peak_CFC1000_acceleration_time_ms": 6.120161492265695,
+  "acceleration_padding_samples_each_end": 1000
+}

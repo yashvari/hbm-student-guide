@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your First HBM Simulation | A student guide by Yash Kumar Vari</title><style>body{margin:0;background:#edf2f5;color:#203346;font:17px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:1020px;margin:32px auto;background:white;padding:46px 60px;border-radius:18px;box-shadow:0 8px 40px #17304a10}h1{font-size:40px;line-height:1.14;color:#123754;letter-spacing:-1px}h2{margin-top:55px;padding-top:16px;border-top:2px solid #d7e8ed;color:#126b70;font-size:28px}h3{font-size:22px;margin-top:30px}a{color:#126b91;text-underline-offset:3px}blockquote{margin:24px 0;padding:12px 24px;border-left:5px solid #c78a47;background:#fff7e9}table{width:100%;border-collapse:collapse;font-size:15px;margin:20px 0;display:block;overflow-x:auto}th{background:#173d55;color:white;text-align:left}th,td{padding:12px;border:1px solid #d8e1e7;vertical-align:top}tr:nth-child(even){background:#f4f8fa}code{background:#edf3f5;padding:2px 5px;border-radius:4px;font-size:.88em;overflow-wrap:anywhere}pre{background:#132c40;color:#edf7fb;padding:18px;border-radius:10px;overflow-x:auto}pre code{background:transparent;padding:0;color:inherit}img{max-width:100%;height:auto;border-radius:12px}li{margin:7px 0}.eyebrow{font-size:13px;letter-spacing:2px;color:#317e83;font-weight:700}.companion{padding:16px;background:#edf5f5;border-radius:10px}@media(max-width:650px){main{padding:24px 18px;margin:0}h1{font-size:30px}body{font-size:16px}}@media print{main{margin:0;padding:0;box-shadow:none}body{background:white;font-size:11pt}h2{break-after:avoid}table,img{break-inside:avoid}a{color:inherit}}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0}.button{display:inline-block;background:#126b70;color:white;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:650}.button.secondary{background:#e8f1f4;color:#16445b}video{width:100%;border-radius:12px;background:#eaf0f4}figure{margin:24px 0}figcaption{font-size:14px;color:#506574}.status{background:#eaf4f2;padding:18px 22px;border-radius:10px}.table-scroll{overflow-x:auto}table{display:table;table-layout:auto}td,th{overflow-wrap:anywhere}a,code{overflow-wrap:anywhere}details{padding:15px;background:#f3f7f9;border-radius:10px;margin:16px 0}summary{cursor:pointer;font-weight:650}h2,h3{scroll-margin-top:20px}.small{font-size:14px;color:#506574}nav{padding:12px 18px;background:#f3f7f9;border-radius:10px}@media(max-width:650px){table{font-size:13px}th,td{padding:8px}h2{font-size:25px}pre{font-size:12px}}</style><meta name="description" content="A practical student guide to VIVA+ head-impact simulation with OpenRadioss, with data, Python analysis and honest result checks."></head><body><main><div class="eyebrow">FREE STUDENT PILOT · LEARN BY DOING</div><h1 id="your-first-hbm-simulation-with-open-tools">Your First HBM Simulation with Open Tools</h1>
+<p><strong>A practical VIVA+ head-impact case study</strong><br>By Yash Kumar Vari · Student pilot v0.2 · Updated 28 September 2026</p><blockquote>
+<p><strong>Welcome!</strong> If you have learned about stiffness matrices but have never watched your own simulation move, this project is for you. We will work through one small human body model case, understand what the solver does, and turn the results into plots and an animation. One step at a time. The skull is complicated enough; the instructions should not be.</p>
+</blockquote>
+<div class="status"><strong>Ready now:</strong> watch the completed smooth-run animation and reproduce the plots from the supplied CSVs. The Linux/HPC head-drop run is demonstrated. A portable, independently tested solver installation guide is still in progress; the Windows full-head route has not been tested.</div><p><strong>Scientific status:</strong> educational solver-adaptation study. The final support force is about 15% below the experimental average. Experimental agreement and exact equivalence to the published LS-DYNA input revision are not established.</p><p>Questions from students on LinkedIn and conversations at IRCOBI 2026 motivated this guide. If you want to enter crash simulation or biomechanics and need help turning a downloaded model into something you understand, start here.</p><div class="hero-actions"><a class="button" href="#start-with-results">Start with the results</a><a class="button secondary" href="#10-make-the-animation">Watch the simulation</a><a class="button secondary" href="#student-help">Ask a question</a></div><h2 id="find-your-way">Find your way</h2>
+<ol>
+<li><a href="#1-what-will-i-learn">What will I learn?</a></li>
+<li><a href="#2-the-five-minute-background">The five-minute background</a></li>
+<li><a href="#3-what-are-we-simulating">What are we simulating?</a></li>
+<li><a href="#4-the-workflow-in-one-picture">The workflow in one picture</a></li>
+<li><a href="#5-tools-and-model-downloads">Tools and model downloads</a></li>
+<li><a href="#6-before-pressing-run">Before pressing Run</a></li>
+<li><a href="#7-starter-then-engine">Starter, then Engine</a></li>
+<li><a href="#8-check-the-result">Check the result</a></li>
+<li><a href="#9-make-sense-of-the-forces">Make sense of the forces</a></li>
+<li><a href="#10-make-the-animation">Make the animation</a></li>
+<li><a href="#11-try-it-yourself">Try it yourself</a></li>
+<li><a href="#12-troubleshooting-and-next-steps">Troubleshooting and next steps</a></li>
+<li><a href="#13-credits-and-further-reading">Credits and further reading</a></li>
+</ol>
+<p>The companion <a href="#project-record">project record</a> records versions, files, modifications, known results, and remaining work.</p>
+<h2 id="1-what-will-i-learn">1. What will I learn?</h2>
+<p>By the end of the finished pilot workflow, you should be able to:</p>
+<ul>
+<li>Explain the main ingredients of a finite element model.</li>
+<li>Prepare an existing head-impact model for OpenRadioss.</li>
+<li>Run a short check before spending time on the full simulation.</li>
+<li>Read a solver log and recognise suspicious results.</li>
+<li>Extract a force–time curve and compare the right quantities.</li>
+<li>View the moving model in ParaView and export an animation.</li>
+<li>Explain the assumptions and limitations in a short report.</li>
+</ul>
+<p><strong>What you need to know already:</strong> basic force, displacement, stress, strain, and Newton’s second law. Some familiarity with files and folders helps. You do not need to derive a brain material law before lunch.</p>
+<p><strong>What this project does not teach yet:</strong> building a human body mesh from medical images, whole-body sled modelling, or making reliable injury predictions. We start with an existing head submodel and learn the simulation workflow around it.</p>
+<h3 id="choose-your-entry-point">Choose your entry point</h3>
+<div class="table-scroll"><table><thead><tr><th>Route</th><th>What you do</th><th>Status</th></tr></thead><tbody><tr><td>Understand</td><td>Read the background and interpret the example.</td><td>Ready now</td></tr><tr><td>Analyze</td><td>Use the included CSV data and Python script to regenerate four figures; no solver or HPC needed.</td><td>Tested locally</td></tr><tr><td>Run</td><td>Prepare and run the translated head case yourself.</td><td>Demonstrated on Linux/HPC; complete portable setup and Windows validation remain pending</td></tr></tbody></table></div><p>No paid solver licence is required for the OpenRadioss route. You still need a suitable computer or permitted access to university computing resources.</p>
+<h2 id="start-with-results">Start here: reproduce the results without a solver</h2><p>Download this repository as a ZIP using <strong>Code → Download ZIP</strong>, extract it, and open a terminal in the folder containing <code>index.html</code>. You need Python; you do not need an OpenRadioss or LS-DYNA installation for this exercise.</p><h3>Windows Command Prompt</h3><pre><code>py -m venv .venv
+.venv\Scripts\python.exe -m pip install -r analysis\requirements.txt
+.venv\Scripts\python.exe analysis\analyze.py</code></pre><h3>Linux or macOS terminal</h3><pre><code>python3 -m venv .venv
+.venv/bin/python -m pip install -r analysis/requirements.txt
+.venv/bin/python analysis/analyze.py</code></pre><p>The environment creation and installation need a working Python installation and internet access for packages. If <code>py</code> is not recognized on Windows, use <code>python</code> after confirming that it launches Python 3.</p><p><strong>Expected outcome:</strong> four PNG/PDF figures in <code>figures/</code>, CSV/JSON analysis summaries in <code>analysis/</code>, and a printed OpenRadioss filtered peak of approximately <strong>3.913 kN</strong>. The script overwrites derived figures and tables, while keeping input CSVs unchanged. Allow small formatting differences between operating systems.</p><p>Start by identifying the experimental mean and this simulation in the force plot. Then explain, in your own words, why support reaction and head-pad contact force are different measurements.</p><h2 id="2-the-five-minute-background">2. The five-minute background</h2>
+<h3 id="fem-fea-and-hbm-three-abbreviations-one-manageable-start">FEM, FEA, and HBM: three abbreviations, one manageable start</h3>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>In plain language</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FEM — finite element method</td>
+<td>A way to approximate a continuous object using many smaller connected pieces</td>
+<td>Divide a skull into elements</td>
+</tr>
+<tr>
+<td>FEA — finite element analysis</td>
+<td>Applying that method to a particular engineering problem</td>
+<td>Calculate how the skull responds during impact</td>
+</tr>
+<tr>
+<td>HBM — human body model</td>
+<td>A numerical representation of human anatomy and its mechanical behaviour</td>
+<td>The VIVA+ head submodel used here</td>
+</tr>
+<tr>
+<td>Node</td>
+<td>A point where quantities such as motion are described</td>
+<td>A corner of an element</td>
+</tr>
+<tr>
+<td>Element</td>
+<td>A small region connecting nodes, with equations for its behaviour</td>
+<td>A shell or solid element</td>
+</tr>
+<tr>
+<td>Material model</td>
+<td>A rule connecting deformation and stress, sometimes including rate or history effects</td>
+<td>Bone and soft tissue use different rules</td>
+</tr>
+<tr>
+<td>Boundary condition</td>
+<td>A rule controlling movement or loading</td>
+<td>Hold the support in place</td>
+</tr>
+<tr>
+<td>Contact</td>
+<td>Rules for how surfaces interact when they meet</td>
+<td>The head meets a deformable pad</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Illustration of nodes, elements, and model ingredients" src="assets/illustration-1.svg"></p>
+<p><strong>A simple analogy:</strong> a model needs geometry, material behaviour, loads, and constraints, much like a recipe needs ingredients, quantities, and cooking instructions. A beautiful mesh with the wrong units is still the wrong recipe.</p>
+<h3 id="why-does-an-impact-calculation-need-so-many-steps">Why does an impact calculation need so many steps?</h3>
+<p>In an explicit dynamic analysis, the solver advances the motion in very small time increments. Small elements and fast stress-wave propagation can require small increments.</p>
+<p>In the earlier completed baseline run, a typical increment was about <strong>0.00036 ms</strong>. That gives the following estimate for an 11 ms event:</p><p><code>11 / 0.00036 ≈ 30,556 increments</code></p>
+<p>The earlier baseline completed 30,556 cycles in about 77 minutes. This is historical runtime evidence, not a newly measured timing for the smoother-output run or a laptop estimate.</p><p><strong>Important:</strong> the solver increment and the saved animation interval are different. Saving a picture every 0.1 ms does not mean the solver jumps forward by 0.1 ms.</p>
+<h2 id="3-what-are-we-simulating">3. What are we simulating?</h2>
+<p>We use the VIVA+ 50F head-without-scalp submodel in the published Yoganandan head lateral-drop setup. The working case is named <code>drop_3.5</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Working case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Body region</td>
+<td>Head submodel, not a complete occupant</td>
+</tr>
+<tr>
+<td>Initial velocity</td>
+<td>−3.5 mm/ms along the specified Z direction</td>
+</tr>
+<tr>
+<td>Speed magnitude</td>
+<td>3.5 m/s</td>
+</tr>
+<tr>
+<td>End time</td>
+<td>11 ms</td>
+</tr>
+<tr>
+<td>Contact</td>
+<td>Head and impact pad</td>
+</tr>
+<tr>
+<td>Environment</td>
+<td>Deformable pad and constrained supporting structure</td>
+</tr>
+<tr>
+<td>Our solver</td>
+<td>OpenRadioss, importing the LS-DYNA-format input</td>
+</tr>
+<tr>
+<td>Our main outputs</td>
+<td>Energies, forces, motion, and animation files</td>
+</tr>
+</tbody>
+</table>
+<p>The model is oriented and positioned by its source transformation cards. Gravity, contact, extra masses, and constraints are also part of the setup. Preserve these definitions unless an intentional, documented study requires a change.</p>
+<h3 id="units-the-quiet-source-of-very-loud-problems">Units: the quiet source of very loud problems</h3>
+<p>The case uses a consistent <strong>mm–ms–kg–kN</strong> system.</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Model unit</th>
+<th>Familiar equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Length</td>
+<td>mm</td>
+<td>1 mm = 0.001 m</td>
+</tr>
+<tr>
+<td>Time</td>
+<td>ms</td>
+<td>1 ms = 0.001 s</td>
+</tr>
+<tr>
+<td>Mass</td>
+<td>kg</td>
+<td>Kilograms</td>
+</tr>
+<tr>
+<td>Velocity</td>
+<td>mm/ms</td>
+<td>1 mm/ms = 1 m/s</td>
+</tr>
+<tr>
+<td>Force</td>
+<td>kN</td>
+<td>1 kN = 1,000 N</td>
+</tr>
+<tr>
+<td>Energy</td>
+<td>kN·mm</td>
+<td>1 kN·mm = 1 J</td>
+</tr>
+<tr>
+<td>Acceleration</td>
+<td>mm/ms²</td>
+<td>Gravity magnitude ≈ 0.00981 mm/ms²</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong> the 3.5 mm/ms input speed is 3.5 m/s, not 3,500 m/s. Units save both simulations and embarrassment.</p>
+<p>The reference run reports about <strong>21.09 kg total model mass</strong>. This includes the setup; do not present it as the mass of a human head.</p>
+<h2 id="4-the-workflow-in-one-picture">4. The workflow in one picture</h2>
+<p><img alt="Six stages from model preparation to interpretation" src="assets/illustration-2.svg"></p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Question to ask</th>
+<th>Evidence to keep</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prepare</td>
+<td>Do the files, units, and include paths make sense?</td>
+<td>Sources, versions, change log</td>
+</tr>
+<tr>
+<td>Starter</td>
+<td>Can the solver read and initialise the model?</td>
+<td>Starter log and initial restart</td>
+</tr>
+<tr>
+<td>Engine</td>
+<td>Can it advance through the requested event?</td>
+<td>Engine log and result files</td>
+</tr>
+<tr>
+<td>Check</td>
+<td>Are the numerical results sensible?</td>
+<td>Energy, mass, timestep checks</td>
+</tr>
+<tr>
+<td>Analyze</td>
+<td>Am I comparing the correct physical quantities?</td>
+<td>Labelled force–time plots</td>
+</tr>
+<tr>
+<td>Visualize</td>
+<td>Can someone understand the event and its limits?</td>
+<td>Animation with units and time</td>
+</tr>
+</tbody>
+</table>
+<p>A useful habit: after every stage, check the expected output before moving on. Launching the Engine repeatedly cannot repair a missing include file. We tested that lesson thoroughly so you do not have to.</p>
+<h2 id="5-tools-and-model-downloads">5. Tools and model downloads</h2>
+<p>Use official sources. Download links are starting points, not a guarantee that the newest release reproduces this draft’s results.</p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>What it does</th>
+<th>Official link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenRadioss</td>
+<td>Calculates the response</td>
+<td><a href="https://openradioss.org/">Website</a> · <a href="https://github.com/OpenRadioss/OpenRadioss/releases">Releases</a></td>
+</tr>
+<tr>
+<td>OpenRadioss documentation</td>
+<td>Explains installation, execution, and input options</td>
+<td><a href="https://openradioss.atlassian.net/wiki/spaces/OPENRADIOSS/overview">Community documentation</a></td>
+</tr>
+<tr>
+<td>VIVA+</td>
+<td>Supplies the human body models and their documentation</td>
+<td><a href="https://vivaplus.readthedocs.io/en/latest/">Documentation</a> · <a href="https://openvt.eu/fem/viva/vivaplus">Model repository</a></td>
+</tr>
+<tr>
+<td>VIVA+ validation project</td>
+<td>Supplies the reference head-drop setup and comparison material</td>
+<td><a href="https://vivaplus-validation.readthedocs.io/en/latest/">Catalog</a> · <a href="https://openvt.eu/fem/viva/vivaplus-validation/">Repository</a></td>
+</tr>
+<tr>
+<td>Python</td>
+<td>Helps read results, calculate quantities, and make plots</td>
+<td><a href="https://www.python.org/downloads/">Download</a> · <a href="https://www.python.org/about/gettingstarted/">Beginner resources</a></td>
+</tr>
+<tr>
+<td>ParaView</td>
+<td>Displays the mesh, motion, and result fields</td>
+<td><a href="https://www.paraview.org/download/">Download</a> · <a href="https://docs.paraview.org/en/latest/UsersGuide/">User guide</a></td>
+</tr>
+</tbody>
+</table>
+<p>Find these locations <strong>inside the validation archive</strong>:</p>
+<ul>
+<li>Head input: <code>submodels/Head/vivaplus-50F-head-noscalp.key</code></li>
+<li>Main case: <code>catalog/Yoganandan-2004-Head-lateral-drop/dyna/50F/drop_test/drop_3.5/main.key</code></li>
+<li>Shared setup: <code>catalog/Yoganandan-2004-Head-lateral-drop/dyna/50F/setup/</code></li>
+</ul>
+<p>Keep the archive’s folder structure. An include file is like a chapter referenced by the main book: moving the chapter without updating the reference makes it disappear from the solver’s point of view.</p>
+<p><strong>Compatibility reminder:</strong> reading an LS-DYNA input in another solver does not automatically give identical formulations or results. This project records the adaptation and checks the outcome.</p>
+<h2 id="6-before-pressing-run">6. Before pressing Run</h2>
+<h3 id="step-a-keep-an-original-and-a-working-copy">Step A — keep an original and a working copy</h3>
+<p>Keep source files untouched. Make changes only in a working copy. Use a different result directory for a different study.</p>
+<p>Suggested project folders:</p>
+<table>
+<thead>
+<tr>
+<th>Folder</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source/</code></td>
+<td>Original downloaded files, with their original internal structure</td>
+</tr>
+<tr>
+<td><code>working/</code></td>
+<td>Prepared case and documented changes</td>
+</tr>
+<tr>
+<td><code>results/smoke/</code></td>
+<td>Short check</td>
+</tr>
+<tr>
+<td><code>results/full/</code></td>
+<td>Complete event</td>
+</tr>
+<tr>
+<td><code>results/video/</code></td>
+<td>Run with more frequent animation output</td>
+</tr>
+<tr>
+<td><code>analysis/</code></td>
+<td>CSV files, plots, and calculations</td>
+</tr>
+<tr>
+<td><code>notes/</code></td>
+<td>Versions, warnings, decisions, and observations</td>
+</tr>
+</tbody>
+</table>
+<p>These are suggested names. The reference run used different cluster directories, recorded in the companion document.</p>
+<h3 id="step-b-record-what-you-downloaded">Step B — record what you downloaded</h3>
+<p>Write down the archive name, release tag or commit, download date, and solver build. A filename containing <code>main</code> is not a fixed version: its contents may change later.</p>
+<p>Our exact validation commit and solver build fingerprint still need to be captured before the student release. The public VIVA+ full-body version and this archived head submodel must not be assumed to be the same release.</p>
+<h3 id="step-c-understand-the-changes-already-made">Step C — understand the changes already made</h3>
+<p>Our working main file adds the unit declaration and corrects the head include path. Three material curves also required reordering of their existing x–y pairs to pass the input checks. That last change affects the model definition and needs engineering review; it is not simply tidying a filename.</p>
+<p>See <a href="inputs/README.md">the input-change record</a> before extending the case. The original preparation script is retained as a record, not a portable installer. Do not repair material curves manually without understanding their intended meaning.</p><h3 id="step-d-use-a-short-check-first">Step D — use a short check first</h3>
+<p>The reference smoke test simulated <strong>0.05 ms</strong>, took about <strong>23 seconds</strong>, and completed 140 cycles. Its job was to check that the workflow starts. It was too short to establish that the full impact response is correct.</p>
+<h3 id="which-computer-do-i-need">Which computer do I need?</h3>
+<p>The completed full run used <strong>four CPU cores on university HPC</strong>, reported about <strong>303 MB solver memory</strong>, and took <strong>1 hour 17 minutes</strong>. Those are measured results for that machine, not a laptop guarantee. Installation, results storage, Python, and ParaView need additional resources.</p>
+<p>Windows instructions and a local hardware benchmark will be added after testing. For now, use the reading route or prepared results rather than guessing Windows executable names from Linux commands.</p>
+<h2 id="7-starter-then-engine">7. Starter, then Engine</h2>
+<p>OpenRadioss has two main stages. Think of the Starter as the preparation check and the Engine as the calculation.</p>
+<table>
+<thead>
+<tr>
+<th>Program</th>
+<th>What it does</th>
+<th>What to inspect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Starter</td>
+<td>Reads the input, maps supported cards, and prepares the model</td>
+<td>Errors, warnings, restart creation</td>
+</tr>
+<tr>
+<td>Engine</td>
+<td>Advances the simulation through time</td>
+<td>Numerical output and final termination</td>
+</tr>
+</tbody>
+</table>
+<h3 id="learn-the-file-names">Learn the file names</h3>
+<table>
+<thead>
+<tr>
+<th>Example</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main-openradioss.key</code></td>
+<td>Working main input in LS-DYNA keyword format</td>
+</tr>
+<tr>
+<td><code>main-openradioss_0000.out</code></td>
+<td>Starter’s written report</td>
+</tr>
+<tr>
+<td><code>main-openradioss_0000_0001.rst</code></td>
+<td>Prepared initial state for the Engine</td>
+</tr>
+<tr>
+<td><code>main-openradioss_0001.rad</code></td>
+<td>Engine controls, including end time and output intervals</td>
+</tr>
+<tr>
+<td><code>main-openradioss_0001.out</code></td>
+<td>Engine’s written report</td>
+</tr>
+<tr>
+<td><code>main-openradiossT01</code></td>
+<td>Time-history results: values saved over time</td>
+</tr>
+<tr>
+<td><code>main-openradiossA001</code></td>
+<td>One saved animation state</td>
+</tr>
+<tr>
+<td><code>head_drop_history.csv</code></td>
+<td>Converted time-history table</td>
+</tr>
+<tr>
+<td><code>main-openradiossA001.vtk</code></td>
+<td>Converted animation state for ParaView</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Execution pattern only — not a complete installation command:</strong></p>
+<pre><code class="language-text">Starter → main-openradioss.key → initial restart
+Engine  → main-openradioss_0001.rad + initial restart → results
+</code></pre>
+<p>On the cluster, Slurm schedules the calculation. <code>sbatch</code> submits a batch job; <code>squeue</code> shows its status. This is the cluster’s queue manager, not part of the physics model. A local computer does not require Slurm.</p>
+<p>The reference full Engine run finished with <code>NORMAL TERMINATION</code>. That confirms completion. It does not certify the physics. A solver can finish a very confident calculation of a badly defined problem.</p>
+<h2 id="8-check-the-result">8. Check the result</h2>
+<h3 id="read-the-progress-line">Read the progress line</h3>
+<p>An illustrative log line based on the reference run:</p>
+<pre><code class="language-text">NC=11300  T=4.0680E+00  DT=3.6000E-04  ERR=-0.3%  DM/M=0.0000E+00
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Meaning here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NC</code></td>
+<td>Cycle count: 11,300 increments completed</td>
+</tr>
+<tr>
+<td><code>T</code></td>
+<td>Simulated time: 4.068 ms</td>
+</tr>
+<tr>
+<td><code>DT</code></td>
+<td>Current increment: 0.00036 ms</td>
+</tr>
+<tr>
+<td><code>ERR</code></td>
+<td>Solver-reported energy error indicator; inspect with the energy histories</td>
+</tr>
+<tr>
+<td><code>DM/M</code></td>
+<td>Relative added-mass indicator; zero at this reported point</td>
+</tr>
+</tbody>
+</table>
+<p><code>3.6000E-04</code> means <code>0.00036</code>. Scientific notation looks intimidating until you realise it mostly saves typing zeros.</p>
+<h3 id="five-checks-before-celebrating">Five checks before celebrating</h3>
+<ol>
+<li><strong>Completion:</strong> did the run reach the intended end time?</li>
+<li><strong>Finite values:</strong> do energies, forces, and masses remain numeric, without <code>NaN</code> or infinity?</li>
+<li><strong>Energy behaviour:</strong> can you explain how kinetic energy becomes deformation energy and other contributions?</li>
+<li><strong>Mass and timestep:</strong> are added mass or a collapsing timestep influencing the result?</li>
+<li><strong>Motion:</strong> does the head contact the intended surface, with sensible constraints and deformation?</li>
+</ol>
+<p>Our earlier, failed whole-body runs showed <code>NaN</code> in the Engine logs but repeated <code>0.5</code> values in several converted CSV columns. Therefore <strong>“all CSV values are finite” was not sufficient</strong>. An isolated value of 0.5 can be perfectly valid; repeated identical values across unrelated signals deserve investigation. This is an observed diagnostic clue, not a universal converter rule.</p>
+<h3 id="a-simple-energy-example">A simple energy example</h3>
+<p>For a hypothetical 2 kg object moving at 3 m/s:</p>
+<p><code>kinetic energy = ½ × mass × speed² = ½ × 2 × 3² = 9 J</code></p>
+<p>When it hits a pad, some motion slows and the pad deforms. You expect kinetic energy and internal energy to change together, with external work, contact, damping, and other terms included in the balance.</p>
+<p>Do not insist that kinetic energy must always be tiny compared with internal energy: this is a dynamic impact, not a quasi-static loading exercise.</p>
+<h2 id="9-make-sense-of-the-forces">9. Make sense of the forces</h2><p>First identify where the experimental measurement was taken. For this reference, compare the reaction at the rigid support beneath the pad.</p><div class="table-scroll"><table><thead><tr><th>Signal</th><th>Definition</th><th>Final-run raw peak</th></tr></thead><tbody><tr><td>Head-pad normal contact force</td><td>Interface 100000; resultant of FNX, FNY, FNZ only</td><td>3.135 kN</td></tr><tr><td>Support reaction</td><td>Node 9041005 of rigid support part 100003; resultant of REACX, REACY, REACZ</td><td>3.918 kN</td></tr></tbody></table></div><p>The pad is a dynamic system, so the two forces need not match at every instant. A resultant is <code>sqrt(Fx² + Fy² + Fz²)</code>; retain signed components when direction matters.</p><h3 id="our-preliminary-comparison">Final smooth-run force comparison</h3><figure><img src="figures/01_force_comparison.png" alt="Final support reaction against the experimental corridor and published LS-DYNA curves" loading="lazy"><figcaption>Published references: VIVA+ Yoganandan head-drop validation catalog. OpenRadioss: this educational adaptation.</figcaption></figure><div class="table-scroll"><table><thead><tr><th>Curve</th><th>Peak force</th><th>Peak time on comparison axis</th></tr></thead><tbody><tr><td>Experimental average</td><td>4.601 kN</td><td>3.325 ms</td></tr><tr><td>Published LS-DYNA, cortical MAT124</td><td>4.785 kN</td><td>3.110 ms</td></tr><tr><td>Published LS-DYNA, cortical MAT81</td><td>4.825 kN</td><td>3.260 ms</td></tr><tr><td>This OpenRadioss run, CFC1000</td><td>3.913 kN</td><td>4.960 ms</td></tr></tbody></table></div><p><strong>Finding:</strong> the filtered OpenRadioss peak is <strong>14.95% lower</strong> and <strong>1.635 ms later</strong> than the experimental average on this comparison axis; the pulse shape also differs. This is a descriptive comparison, not a validation pass/fail criterion.</p><h3>Filtering and the time axis</h3><p>OpenRadioss support-force X/Y/Z components are resampled onto a uniform grid, filtered individually with <strong>CFC1000</strong> using Dynasaur 1.3.18, then combined into a resultant. Published LS-DYNA CSVs are already processed and are not filtered again. The raw peak is 3.918 kN; filtering changes it only slightly, so it does not explain the mismatch.</p><p>The comparison follows the reference notebook by plotting simulation time minus <strong>1 ms</strong>. Experimental times remain unchanged. Equal physical contact onset has not been independently established. No curve is shifted to align its peak. Energy and motion plots use original simulation time.</p><h3>Energy and motion checks</h3><figure><img src="figures/02_energy_checks.png" alt="Final-run energy histories and added mass" loading="lazy"><figcaption>Initial kinetic energy: 21.521 J. Final internal energy: 18.868 J; final kinetic energy: 2.916 J. The energy channels are diagnostics, not a reconstructed complete balance.</figcaption></figure><p>All 1,100 × 647 numeric values are finite. Total mass is 21.086 kg, including the support/setup; it is not head mass alone. Added mass is approximately zero. Peak absolute hourglass energy is approximately 0.149% of initial kinetic energy. These checks support interpretation but do not establish experimental agreement.</p><figure><img src="figures/03_head_motion.png" alt="Global displacement, velocity and filtered resultant acceleration at node 1090010" loading="lazy"></figure><p>Displacement and velocity describe node 1090010; head displacement includes rigid motion and must not be labelled skull deformation. Its resultant acceleration uses component-wise CFC1000 filtering: approximately <strong>96.5 g at 6.12 ms</strong>, versus a raw peak of 179.5 g. This is a nodal response, not an injury prediction. The selected filter is a head-impact processing convention; full SAE channel compliance has not been established.</p><details><summary>See the larger acceleration plot and method details</summary><img src="figures/04_acceleration_filtered.png" alt="Raw and CFC1000 resultant head acceleration" loading="lazy"><p>The acceleration routine uses SAE J211-style coefficients with forward/backward filtering and documented endpoint reflection. Its endpoint handling differs from the legacy Dynasaur force routine. See <a href="docs/METHODS.md">METHODS.md</a> for sampling, padding and source details.</p></details><h3 id="solver-differences">What could explain the solver difference?</h3><p>OpenRadioss translates LS-DYNA keywords to its own formulations. In our Starter report, the pad’s <code>MAT_063</code> becomes <code>LAW33</code>. The original pad input includes Poisson’s ratio 0.43; LAW33 theory describes uncoupled stresses and zero Poisson effect before full compaction. This gives us a concrete material-behaviour question to investigate.</p><p>Checks of the imported listing preserved the pad density, elastic modulus and 113 curve-11 point values, with a strain-sign conversion; the detailed friction law retains 0.7. Curves 10, 112 and 150 were reordered elsewhere; the active pad material references curve 11. Those facts narrow the investigation, but they do not establish the cause of the full-head mismatch.</p><p>A separate one-element compression test was used to investigate lateral motion and unloading. Its results remain a research observation requiring controls, including PR=0 tests, element-formulation checks and a pad-only intervention in the head case. Contact, other mapped materials and reference revision differences remain possible contributors. Documented LAW33 behaviour is not itself evidence of a software bug.</p><p class="small">Sources: <a href="https://2022.help.altair.com/2022.3/hwsolvers/rad/topics/solvers/rad/mat_063_crushable_foam_lsdyna_r.htm">MAT_063 mapping</a> · <a href="https://help.altair.com/2022/hwsolvers/rad/topics/solvers/rad/theory_material_laws_viscous_materials_visco_elasto_plastic_mat_foams_r.htm">LAW33 theory</a>. Confirm the current mapping for your exact solver build.</p><h2 id="10-make-the-animation">10. Make the animation</h2>
+<p>The smoother run has completed. Its verified export contains <strong>111 frames</strong>, shown at <strong>24 fps</strong> in <strong>1560 × 780</strong> resolution. The supplied video repeats the same simulation five times: <strong>23.125 seconds</strong> of slow-motion playback, not five independent tests. Repetitions were made without re-encoding.</p><figure><video controls playsinline preload="metadata"><source src="media/head_drop_final_5_loops.mp4" type="video/mp4">Your browser cannot play this video. Download the MP4 from the repository media folder.</source></video><figcaption>VIVA+ 50F head lateral drop, initial speed 3.5 m/s. Educational OpenRadioss adaptation; displacement colour range fixed at 0–20 mm.</figcaption></figure><p>Animation output was requested every <strong>0.1 ms</strong>. The solver still advances at its much smaller time increment. Frame indices 0–110 are not milliseconds.</p><p><img alt="Illustration of solver increments versus animation output" src="assets/illustration-3.svg"></p>
+<p><strong>Demonstrated conversion syntax on Linux</strong>, after the tools are installed and available in the current directory or command path:</p>
+<pre><code class="language-bash">th_to_csv_linux64_gf main-openradiossT01 head_drop_history
+anim_to_vtk_linux64_gf main-openradiossA001 &gt; main-openradiossA001.vtk
+</code></pre>
+<p>The first command produces <code>head_drop_history.csv</code>. The second converts one animation state. Our cluster used full executable paths and Slurm; these short examples explain the syntax rather than replace the pending portable setup instructions.</p>
+<h3 id="in-paraview">In ParaView</h3>
+<ol>
+<li>Open the grouped <code>.vtk</code> file sequence using <strong>File → Open</strong>.</li>
+<li>Click <strong>Apply</strong> so ParaView loads the data.</li>
+<li>Choose a useful view and play the sequence.</li>
+<li>If available, colour by displacement magnitude and label it in mm. <code>NODE_ID</code> is an identifier, not a physical response.</li>
+<li>Keep one colour range across the animation so colours have consistent meaning.</li>
+<li>Save the view with <strong>File → Save State</strong>.</li>
+<li>Export with <strong>File → Save Animation</strong>. MP4 availability depends on the installed build; a PNG image sequence is another export route.</li>
+</ol>
+<p><strong>Before sharing:</strong> show the case name, initial speed, displayed quantity and unit, and correct physical time. If ParaView shows frame numbers 0, 1, 2, …, do not label those numbers “ms.” Actual timestamps need to be assigned or verified.</p>
+<p>At 24 frames/s, 111 saved states play in about <strong>4.6 seconds</strong>. This is slow-motion playback of an 11 ms event. Repeating frames can make the clip longer but does not create new simulation information.</p>
+<h2 id="11-try-it-yourself">11. Try it yourself</h2>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Your answer should show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Convert 3.5 mm/ms to m/s</td>
+<td>Understanding of consistent units</td>
+</tr>
+<tr>
+<td>Estimate cycles for 11 ms at 0.00036 ms</td>
+<td>Difference between physical time and computation</td>
+</tr>
+<tr>
+<td>Explain the two force signals</td>
+<td>Awareness of the measurement location</td>
+</tr>
+<tr>
+<td>Find peak force and its time</td>
+<td>Ability to extract a meaningful result</td>
+</tr>
+<tr>
+<td>Identify one limitation</td>
+<td>Scientific judgment</td>
+</tr>
+<tr>
+<td>Create a labelled 10-second presentation clip</td>
+<td>Clear communication; slow playback or looping is fine if labelled</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>Check the first two answers</summary>
+
+3.5 mm/ms equals 3.5 m/s. The estimated cycle count is about 30,556. Actual timesteps may vary, so this is an estimate, not an instruction to force that exact count.
+
+</details>
+
+<p>Your final mini-report can be one page: <strong>question → model → checks → result → limitation</strong>. A classmate should be able to understand it without decoding your terminal history.</p>
+<h2 id="12-troubleshooting-and-next-steps">12. Troubleshooting and next steps</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>First useful action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Include file not found</td>
+<td>Confirm the file exists and inspect the include path relative to the case</td>
+</tr>
+<tr>
+<td>Missing shared library on Linux</td>
+<td>Follow the solver environment setup; do not repeatedly rerun the same command</td>
+</tr>
+<tr>
+<td>Function-read error</td>
+<td>Read the full curve ID and error description; inspect a working copy and seek help before changing data</td>
+</tr>
+<tr>
+<td>Starter writes no restart</td>
+<td>Resolve Starter errors before launching the Engine</td>
+</tr>
+<tr>
+<td>Normal termination but suspicious results</td>
+<td>Inspect the log, energies, mass, and motion together</td>
+</tr>
+<tr>
+<td>Animation barely moves between frames</td>
+<td>Check the saved-state interval and displayed sequence</td>
+</tr>
+<tr>
+<td>Command not found after pasting</td>
+<td>Copy the command only, without the terminal prompt or previous output</td>
+</tr>
+<tr>
+<td>Downloaded archive will not extract</td>
+<td>Check download completion; do not assume it is a model error</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-remains-before-the-free-student-pilot">What is ready, and what comes next?</h3><ul><li><strong>Ready:</strong> the final smooth MP4, four figures, raw history, reproducible analysis and this guide.</li><li><strong>Documented:</strong> support-force discrepancy, processing choices, material mapping and input edits.</li><li><strong>Still needed for a full run tutorial:</strong> fixed source revision and solver fingerprints, complete portable setup, tested Windows execution and independent student reproduction.</li><li><strong>Research:</strong> controlled pad tests and reference-version checks before explaining the full solver difference.</li></ul><h3 id="student-help">Student questions and feedback</h3><p>Use <strong>GitHub Discussions → Q&amp;A</strong> for learning questions. Use <strong>Issues</strong> for broken instructions, missing files or a reproducible error. Your question may help the next student too.</p><div class="hero-actions"><a class="button repo-discussions" href="#feedback-template">Ask in Discussions</a><a class="button secondary repo-issues" href="#feedback-template">Report an issue</a><a class="button secondary repo-home" href="#start-with-results">Open repository</a></div><p class="small repo-local-note">When this page is hosted on the standard GitHub Pages address, these buttons connect to the matching repository automatically. In an offline copy, use the Discussions or Issues tab in the repository you downloaded.</p><h3 id="feedback-template">Include this with your question</h3><pre><code>Operating system and tool versions:
+Guide section / step:
+What I expected:
+What happened:
+Exact error text:
+What I already tried:</code></pre><p>Remove credentials and private paths from logs. Student feedback is welcome; this is a pilot guide, and the author’s response time is not guaranteed.</p><h2 id="13-credits-and-further-reading">13. Credits and further reading</h2>
+<p>This educational workflow is being prepared by <strong>Yash Kumar Vari</strong>. VIVA+ developers created the human body model, and the validation contributors supplied the published test setup and reference material. The project adapts and documents execution and analysis with OpenRadioss, Python, and ParaView.</p>
+<ul>
+<li><a href="https://vivaplus.readthedocs.io/en/latest/">VIVA+ documentation and citation instructions</a></li>
+<li>John, Klug, Kranjec, Svenning and Iraeus (2022), <a href="https://doi.org/10.3389/fbioe.2022.918904">Hello, world! VIVA+: A human body model lineup to evaluate sex-differences in crash protection</a>.</li>
+<li><a href="https://vivaplus-validation.readthedocs.io/en/latest/">VIVA+ validation catalog</a> — find the Yoganandan 2004 head lateral-drop case and its original experimental references.</li>
+<li><a href="https://openradioss.atlassian.net/wiki/spaces/OPENRADIOSS/pages/19628079">Running OpenRadioss</a></li>
+<li><a href="https://docs.paraview.org/en/latest/UsersGuide/savingResults.html">ParaView: saving results, animations, and state</a></li>
+</ul>
+<p>Retain each source file’s licence and notices. This draft does not relicense the model or reference data. It is an independent educational project and does not imply endorsement by Audi, VIVA+, or the software providers.</p>
+<p><strong>Your first goal:</strong> understand one result well enough to explain it. More elements can wait.</p><section id="project-record"><h2>Project record · v0.2</h2><p>This update uses the completed smooth-run history <code>head_drop_final_history.csv</code>. It supersedes the earlier unfiltered 3.92 kN estimate. The full quantitative methods are in <a href="docs/METHODS.md">METHODS.md</a>; input changes are in <a href="inputs/README.md">inputs/README.md</a>.</p><div class="table-scroll"><table><thead><tr><th>Item</th><th>Recorded evidence</th><th>Limit</th></tr></thead><tbody><tr><td>Source</td><td>VIVA+ validation archive; published notebook says 2.0.0 beta 1 / LS-DYNA R12.1</td><td>Exact archive commit is not established.</td></tr><tr><td>OpenRadioss</td><td>Linux GNU double-precision Starter/Engine; baseline 0 errors and 11 warnings</td><td>Exact build/executable hashes still needed; copyright year is not a version.</td></tr><tr><td>Final history</td><td>1,100 rows × 647 columns; all finite; last saved time 10.99029 ms</td><td>History need not include the requested 11 ms endpoint.</td></tr><tr><td>Final animation</td><td>111 frames at 24 fps; 1560 × 780; five repeats</td><td>Frame count and playback time are not physical timestamps.</td></tr><tr><td>Input changes</td><td>Units, head include path, curves 10/112/150 reordered in a separate setup</td><td>Preserved point pairs do not guarantee preserved material interpretation.</td></tr><tr><td>Pad mapping</td><td>Material 10, active curve 11, MAT_063 → LAW33</td><td>Requires controlled material and system tests; not a proven explanation of all discrepancy.</td></tr></tbody></table></div><p>The original baseline ran on four HPC CPU cores and reported about 303 MB solver memory and 77 minutes runtime. Those measurements exclude additional storage and postprocessing needs and are not performance guarantees for the final animation run or another machine.</p><p><strong>Source hashes:</strong> included analysis inputs are recorded in <code>analysis/input_sha256.json</code>. The original setup used for the cube material extraction had SHA-256 <code>405f25d20c07b6ed1b856d31d6ecba94334f5c19ec2594367947738ed6134c53</code>. This identifies those bytes, not the unknown upstream commit.</p></section></main><script>(function(){let repo="";const h=location.hostname;if(h.endsWith(".github.io")){const user=h.slice(0,-10);const slug=location.pathname.split("/").filter(Boolean)[0];if(user&&slug)repo="https://github.com/"+user+"/"+slug;}if(!repo)return;for(const [cls,suffix] of [["repo-home",""],["repo-discussions","/discussions"],["repo-issues","/issues"]]){document.querySelectorAll("."+cls).forEach(a=>a.href=repo+suffix);}document.querySelectorAll(".repo-local-note").forEach(n=>n.hidden=true);})();</script></body></html>
